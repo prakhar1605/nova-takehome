@@ -1,40 +1,46 @@
-"""Your harness. The grader calls exactly these three commands, in a fresh process each time:
+"""Nova freight-invoice audit harness. The grader calls exactly these three commands, each in a fresh process:
 
     python harness.py ingest <batch_dir> --state-dir <dir>
     python harness.py report --as-of YYYY-MM-DD [--mode supervised|autonomous] [--state-dir <dir>] > report.json
     python harness.py feedback <feedback.json> --state-dir <dir>
 
-- ingest: read every .eml in <batch_dir> (attachments inside) and store what you learn under --state-dir. The process
-  is restarted between batches, so everything you need later must be on disk.
-- report: print one report.json (grader/schema/report.schema.json) to stdout. Only documents received on or before
-  --as-of count. --mode defaults to supervised.
-- feedback: take in a person's decisions on what you escalated (feedback.json) and let them change later reports.
+How it works (details in DESIGN.md and the docstrings under harness/nova/):
+- ingest   reads every email and attachment (OCR for scans), and an LLM reader (rules reader as fallback) turns each
+           document into typed facts with the exact source line, saved under --state-dir.
+- report   a deterministic rules engine rebuilds the world as of the date (only documents received by then), runs
+           the checks (overcharge, duplicate, waived but billed, late fees, cashback, expiry, conflicts, missing
+           documents), applies feedback, chooses the action for the mode and prints report.json.
+- feedback stores a person's decisions with their scope; later reports apply them only where the scope matches.
 
-The environment gives ANTHROPIC_API_KEY and ANTHROPIC_BASE_URL. Keep the argument names as they are: grader/validate.py
-checks them. Replace the NotImplementedError bodies with your code.
+The environment gives ANTHROPIC_API_KEY and ANTHROPIC_BASE_URL.
 """
 from __future__ import annotations
 
 import argparse
+import json
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 DEFAULT_STATE = ".state"
 
 
 def ingest(batch_dir: str, state_dir: str) -> None:
-    raise NotImplementedError(
-        f"ingest is not written yet: read the .eml files in {batch_dir} and keep what you learn under {state_dir}")
+    from nova.ingest import ingest as run
+    run(batch_dir, state_dir)
 
 
 def report(as_of: str, mode: str, state_dir: str) -> dict:
-    raise NotImplementedError(
-        f"report is not written yet: return the report.json dict for --as-of {as_of} in {mode} mode "
-        "(see grader/schema/report.schema.json and data/examples/*/expected_finding.json)")
+    from nova.report import build
+    from nova.store import Store
+    return build(Store(state_dir), as_of, mode)
 
 
 def feedback(feedback_file: str, state_dir: str) -> None:
-    raise NotImplementedError(
-        f"feedback is not written yet: store the decisions in {feedback_file} under {state_dir} so later reports use them")
+    from nova.store import Store
+    fb = json.loads(Path(feedback_file).read_text())
+    Store(state_dir).add_feedback(fb, Path(feedback_file).name)
 
 
 def main(argv=None) -> int:
@@ -55,7 +61,6 @@ def main(argv=None) -> int:
         if a.cmd == "ingest":
             ingest(a.batch_dir, a.state_dir)
         elif a.cmd == "report":
-            import json
             json.dump(report(a.as_of, a.mode, a.state_dir), sys.stdout, indent=1)
             sys.stdout.write("\n")
         else:
