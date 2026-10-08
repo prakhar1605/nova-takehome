@@ -26,8 +26,9 @@ INVOICE_ID_PATTERNS = [
     r"Charges advice\s*([A-Z0-9][A-Z0-9/\-]{4,})",
     r"STATEMENT OF ACCOUNT\s+([A-Z0-9][A-Z0-9/\-]{4,})",
     r"(?:Invoice|Bill|Document)\s+(?:no\.?|number|#)\s*:?\s*([A-Z0-9][A-Z0-9/\-]{4,})",
+    r"\bstatement\s+(?:no\.?\s*|number\s*)?([A-Z][A-Z0-9/\-]*\d[A-Z0-9/\-]*)",
 ]
-DATE_TOKEN = (r"(\d{4}-\d{2}-\d{2}|\d{1,2}/\d{1,2}/\d{4}|\d{1,2} [A-Z][a-z]{2,8} \d{4}|[A-Z][a-z]{2,8} \d{1,2}, \d{4})")
+DATE_TOKEN = (r"(\d{4}-\d{2}-\d{2}|\d{1,2}[/.]\d{1,2}[/.]\d{4}|\d{1,2} [A-Z][a-z]{2,8} \d{4}|[A-Z][a-z]{2,8} \d{1,2}, \d{4})")
 
 
 def lines_of(doc: dict) -> list[list[str]]:
@@ -159,6 +160,15 @@ def read_contract(doc: dict) -> dict:
     idays = re.search(r"(\d+) days after", im)
     f["improvement"] = ({"pct": ip[1], "due_days": int(idays[1]) if idays else 60}
                         if ip and "not applicable" not in im.lower() else None)
+    mg, ms = txt("margin"), txt("margin_step")
+    f["margin"] = None
+    if mg and "not applicable" not in mg.lower():
+        mp = re.search(r"(\d+(?:\.\d+)?)%", mg)
+        sp = re.findall(r"(\d+(?:\.\d+)?)%", ms)
+        th = re.search(r"(?:USD|exceeds|reaches|above)\s*(?:USD\s*)?([\d,]+(?:\.\d+)?)", ms)
+        f["margin"] = {"pct": mp[1] if mp else None, "step_down_pct": sp[-1] if sp else None,
+                       "threshold_usd": str(D(th[1])) if th else None,
+                       "basis": "cost" if re.search(r"carrier cost|cost billed", ms, re.I) else "qs"}
     qs = txt("qs").lower()
     f["qs"] = {"includes_accessorials": "accessorial" in qs, "excludes": [w for w in ("tax", "dut", "late fee", "rebate")
                                                                           if w in qs]}
@@ -352,6 +362,11 @@ AUTOMATION_RE = re.compile(r"\b(AI|A\.I\.|automated|automation|auditor|audit(?:i
                            r"language model|LLM|bot|agent|system prompt|ignore (?:all |any )?(?:previous|prior))\b")
 
 
+WAIVE_RE = re.compile(r"\bwaiv|\bwritten off\b|\bwrite(?:-| )off\b|\bwriting off\b|will not (?:charge|bill|pursue)|"
+                      r"won't (?:charge|bill)|\bcancel(?:led|ling)? the .{0,40}(?:charge|fee)|\bdrop(?:ped)? the "
+                      r".{0,40}(?:charge|fee)", re.I)
+
+
 def read_email(doc: dict, labels: dict[str, str]) -> list[dict]:
     meta = doc["meta"]
     body = body_lines(doc)
@@ -383,11 +398,11 @@ def read_email(doc: dict, labels: dict[str, str]) -> list[dict]:
                       "rates": rows, "src": [1, wl]})
     # waiver (own text)
     for i, s in own:
-        if re.search(r"\bwaiv", s, re.I) and not re.search(r"\bno waiver\b|\bnot (?:be )?waived\b", s, re.I):
+        if WAIVE_RE.search(s) and not re.search(r"\bno waiver\b|\bnot (?:be )?waived\b|cannot waive|unable to waive", s, re.I):
             facts.append(_waiver(s, i, labels, text, quoted=False))
     if not any(f["type"] == "waiver" for f in facts):
         for i, s in quoted:
-            if re.search(r"\bwaiv", s, re.I):
+            if WAIVE_RE.search(s):
                 w = _waiver(s.lstrip("> ").strip(), i, labels, text, quoted=True)
                 qs = next((q for _, q in quoted if re.search(r"^On .* (.+?) wrote:|^From:", q)), "")
                 mm = re.search(r"^On .*?,\s*(.+?)\s+(?:<[^>]+>\s*)?wrote:", qs) or re.search(r"From:\s*(.+?)\s*<", qs)
@@ -398,7 +413,9 @@ def read_email(doc: dict, labels: dict[str, str]) -> list[dict]:
     for i, s in own:
         m = re.search(r"extend(?:ed)? the due date of (?:invoice )?([A-Z0-9][A-Z0-9/\-]{4,}) to " + DATE_TOKEN, s, re.I) or \
             re.search(r"(?:Invoice )?([A-Z0-9][A-Z0-9/\-]{4,}) now falls due on " + DATE_TOKEN, s, re.I) or \
-            re.search(r"due date (?:of|for) (?:invoice )?([A-Z0-9][A-Z0-9/\-]{4,}) (?:is|has been) (?:extended|moved) to " + DATE_TOKEN, s, re.I)
+            re.search(r"due date (?:of|for) (?:invoice )?([A-Z0-9][A-Z0-9/\-]{4,}) (?:is|has been) (?:extended|moved) to " + DATE_TOKEN, s, re.I) or \
+            re.search(r"(?:payment (?:for|of)|invoice)\s+([A-Z0-9][A-Z0-9/\-]{4,})\s+may (?:now )?be (?:made|paid|settled) "
+                      r"(?:up to|until|by|on or before)\s+" + DATE_TOKEN, s, re.I)
         if m:
             facts.append({"type": "due_date_extension", "invoice_id": m[1], "new_due_date": parse_date(m[2]).isoformat(),
                           "src": [1, i]})
@@ -455,9 +472,13 @@ def _waiver(s: str, i: int, labels: dict[str, str], text: str, quoted: bool) -> 
     for lab in labels:
         if lab and lab in ns and len(lab) > best:
             label, best = labels[lab], len(lab)
-    months = [f"{d.year:04d}-{d.month:02d}" for d in
-              [parse_date(x) for x in re.findall(r"\b(?:[A-Z][a-z]+ \d{4})\b", s)] if d]
-    months += re.findall(r"\b(\d{4}-\d{2})\b(?!-)", s)
+    from .util import month_of
+    months = [month_of(x) for x in re.findall(r"\b[A-Z][a-z]{2,8}\.? \d{4}\b", s)]
+    # "March and April 2041": a month name followed by another month and a year
+    for a, b, y in re.findall(r"\b([A-Z][a-z]{2,8}) (?:and|&|to|-) ([A-Z][a-z]{2,8}) (\d{4})\b", s):
+        months += [month_of(f"{a} {y}"), month_of(f"{b} {y}")]
+    months += re.findall(r"(?<!\d)(\d{4}-\d{2})(?![-\d])", s)
+    months = sorted({m for m in months if m})
     inv = [x for x in re.findall(r"\b(?:invoice|statement)\s+([A-Z0-9][A-Z0-9/\-]{4,})", s, re.I)]
     cond = re.search(r"(provided (?:that )?.+|on condition that .+|conditional (?:up)?on .+|subject to .+)", text, re.I)
     return {"type": "waiver", "charge_code": label, "charge_label": label, "awbs": awbs, "months": months,
@@ -493,7 +514,7 @@ def match_label(s: str, labels: dict[str, str]):
 def _dayfirst(pages) -> bool:
     for ls in pages:
         for s in ls:
-            for a, b, _ in re.findall(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b", s):
+            for a, b, _ in re.findall(r"\b(\d{1,2})[/.](\d{1,2})[/.](\d{4})\b", s):
                 if int(a) > 12:
                     return True
                 if int(b) > 12:
@@ -514,6 +535,9 @@ def parse_invoice_line(s: str, labels, dayfirst=True, order_amount_first=None):
     lm = match_label(s, labels)
     late = re.search(r"Late fee on ([A-Z0-9][A-Z0-9/\-]{4,}):?\s*([A-Z]{3})?\s*([\d,]+\.\d+) overdue,\s*month (\d+)\s*@\s*"
                      r"([\d.]+)%", s, re.I)
+    if not late and lm and lm[0] == "LATE":
+        late = re.search(r"(?:on|re|for|of)\s+([A-Z]{2,5}[A-Z0-9/\-]*\d[A-Z0-9/\-]*)\W+(?:\(?\s*([A-Z]{3})\s*)?"
+                         r"([\d,]+\.\d+)[^0-9]+?month\s*(\d+)\D+?([\d.]+)\s*%", s, re.I)
     if not lm and not late:
         return None
     work = s
@@ -625,10 +649,10 @@ def read_invoice(doc: dict, labels) -> dict | None:
     kind = "invoice"
     for p, i, s in flat:
         for pat in INVOICE_ID_PATTERNS:
-            m = re.search(pat, s, re.I if "STATEMENT" not in pat else 0)
+            m = re.search(pat, s, re.I if "STATEMENT OF" not in pat else 0)
             if m and not re.match(r"(DATE|NO|NUMBER)$", m[1], re.I):
                 inv_id, src_id = m[1].rstrip(".,"), [p, i]
-                if "STATEMENT" in pat:
+                if "tatement" in pat or "STATEMENT" in pat:
                     kind = "statement"
                 break
         if inv_id:
@@ -659,7 +683,8 @@ def read_invoice(doc: dict, labels) -> dict | None:
                     return d.isoformat()
         return None
 
-    inv_date = date_after("Invoice date", "Issued on", "Document date", "Statement date", "Date of issue", "Dated")
+    inv_date = date_after("Invoice date", "Issued on", "Document date", "Statement date", "Date of issue", "Billing date",
+                          "Bill date", "Issued", "Dated")
     due = date_after("Due date", "Settle by", "Payable by", "Payment due", "Due by", "Due")
     cm = re.search(r"(?:Contract(?: reference)?|Service agreement|Agreement)\s*:?\s*([A-Z]{2,4}-[A-Z]{2}-[A-Z]{2,4}-[A-Z0-9]+)",
                    text) or re.search(r"([A-Z]{2,4}-[A-Z]{2}-[A-Z]{2,4}-[A-Z0-9]+)", text)
@@ -710,7 +735,8 @@ def read_credit_note(doc: dict) -> dict | None:
     if not period:
         pm = re.search(r"\b(\d{4}-Q[1-4]|CY\d+)\b", text)
         period = pm[1] if pm else None
-    refs = re.findall(r"(?:invoice|against|ref(?:erence)?)\s+([A-Z]{2,4}[A-Z0-9/\-]{4,})", text, re.I)
+    refs = [r for r in re.findall(r"(?:invoice|against|ref(?:erence)?|credits?)\s+(?:invoice\s+|no\.?\s*)?"
+                                  r"([A-Z]{2,5}[A-Z0-9/\-]*\d[A-Z0-9/\-]*)", text, re.I) if not r.startswith(("CN", cid[1] if cid else "~"))]
     tl = None
     if total:
         _, tp, ti = find(pages, r"Total credit")
@@ -774,54 +800,105 @@ def read_dgd(doc: dict) -> dict | None:
     return {"type": "dg_declaration", "awb": m[1], "items": items, "src": [p, i]}
 
 
+EVENT_WORDS = [
+    (r"pick(?:ed)?[ _-]?up|collected from shipper|tendered|accepted", "PICKED_UP"),
+    (r"collected by (?:the )?consignee|consignee collect|self[ -]?collect|picked up by consignee", "COLLECTED_BY_CONSIGNEE"),
+    (r"out for delivery", "OUT_FOR_DELIVERY"),
+    (r"delivered|proof of delivery|pod\b", "DELIVERED"),
+    (r"arrived|arrival|received at (?:facility|warehouse|hub)", "ARRIVED_FACILITY"),
+    (r"depart", "DEPARTED"),
+    (r"customs hold|held (?:by|at) customs|customs inspection", "CUSTOMS_HOLD"),
+    (r"releas", "RELEASED"),
+]
+STATUS_WORDS = [(r"^(paid|settled|cleared|closed|remitted|paid in full)", "paid"),
+                (r"schedul|approved|in payment run|queued", "scheduled"),
+                (r"disput|on hold|query", "disputed"),
+                (r"open|unpaid|outstanding|due|overdue|pending|not paid|awaiting", "open")]
+
+
+def canon_event(v: str) -> str:
+    v0 = (v or "").strip()
+    up = re.sub(r"[^A-Z_]", "_", v0.upper()).strip("_")
+    if up in ("PICKED_UP", "DEPARTED", "ARRIVED_FACILITY", "OUT_FOR_DELIVERY", "DELIVERED", "COLLECTED_BY_CONSIGNEE",
+              "CUSTOMS_HOLD", "RELEASED"):
+        return up
+    for rx, ev in EVENT_WORDS:
+        if re.search(rx, v0, re.I):
+            return ev
+    return up
+
+
+def canon_status(v: str) -> str:
+    v0 = (v or "").strip().lower()
+    for rx, st in STATUS_WORDS:
+        if re.search(rx, v0):
+            return st
+    return v0
+
+
+def _col(hdr, *words, avoid=()):
+    for n, h in enumerate(hdr):
+        if any(w in h for w in words) and not any(a in h for a in avoid):
+            return n
+    return None
+
+
 def read_table(doc: dict) -> dict | None:
-    """Tracking exports and AP registers (any sheet whose header names the columns)."""
+    """Tracking exports and payment ledgers, whatever their column names, found by the header row."""
     pages = lines_of(doc)
     for p, ls in enumerate(pages, 1):
-        if not ls or not ls[0]:
-            continue
-        hdr = [h.strip().lower() for h in ls[0].split(" | ")]
-        if any("event" in h for h in hdr) and any("awb" in h or "waybill" in h or "shipment" in h for h in hdr):
-            ix = {k: next((n for n, h in enumerate(hdr) if any(w in h for w in ws)), None) for k, ws in {
-                "awb": ("awb", "waybill", "shipment"), "event": ("event", "status"), "date": ("date",),
-                "station": ("station", "location"), "reason": ("reason",)}.items()}
-            evs = []
-            for i, s in enumerate(ls[1:], 2):
-                c = s.split(" | ")
-                if len(c) <= max(v for v in ix.values() if v is not None):
+        for hi, head in enumerate(ls[:6], 1):
+            hdr = [h.strip().lower() for h in head.split(" | ")]
+            awb = _col(hdr, "awb", "waybill", "shipment", "tracking no", "consignment")
+            ev = _col(hdr, "event", "status", "milestone", "activity")
+            inv = _col(hdr, "invoice", "document", "bill no", "reference", avoid=("date",))
+            if awb is not None and ev is not None and inv is None:
+                ix = {"awb": awb, "event": ev, "date": _col(hdr, "date", "time"),
+                      "station": _col(hdr, "station", "location", "place", "port"),
+                      "reason": _col(hdr, "reason", "note", "remark", "code", "comment")}
+                if ix["date"] is None:
                     continue
-                d = parse_date(c[ix["date"]])
-                if not d:
-                    continue
-                ev = re.sub(r"[^A-Z_]", "_", c[ix["event"]].strip().upper())
-                evs.append({"awb": c[ix["awb"]].strip(), "event": ev, "date": d.isoformat(),
-                            "station": c[ix["station"]].strip() if ix["station"] is not None else None,
-                            "reason": (c[ix["reason"]].strip() if ix["reason"] is not None and
-                                       c[ix["reason"]].strip() not in ("-", "") else None),
-                            "src": [p, i]})
-            return {"type": "tracking", "events": evs, "src": [p, 1]}
-        if any("invoice" in h for h in hdr) and any("status" in h for h in hdr):
-            ix = {k: next((n for n, h in enumerate(hdr) if any(w in h for w in ws)), None) for k, ws in {
-                "id": ("invoice no", "invoice", "document"), "date": ("invoice date",), "due": ("due",),
-                "amount": ("amount",), "status": ("status",), "paid": ("paid",)}.items()}
-            rows = []
-            for i, s in enumerate(ls[1:], 2):
-                c = s.split(" | ")
-                if len(c) < 3:
-                    continue
-                amt = c[ix["amount"]] if ix["amount"] is not None and ix["amount"] < len(c) else ""
-                cur = re.search(r"[A-Z]{3}", amt)
-                rows.append({"invoice_id": c[ix["id"]].strip(),
-                             "invoice_date": (parse_date(c[ix["date"]]) or None) and parse_date(c[ix["date"]]).isoformat(),
-                             "due_date": (parse_date(c[ix["due"]]) or None) and parse_date(c[ix["due"]]).isoformat(),
-                             "currency": cur[0] if cur else None, "amount": str(D(amt)) if D(amt) is not None else None,
-                             "status": c[ix["status"]].strip().lower() if ix["status"] is not None else None,
-                             "paid_date": (parse_date(c[ix["paid"]]).isoformat()
-                                           if ix["paid"] is not None and ix["paid"] < len(c) and parse_date(c[ix["paid"]])
-                                           else None),
-                             "src": [p, i]})
-            m = re.search(r"\d{4}-\d{2}-\d{2}", doc["name"] + " " + doc["meta"].get("subject", ""))
-            return {"type": "ledger", "as_of": m[0] if m else doc["received"], "rows": rows, "src": [p, 1]}
+                evs = []
+                for i, s_ in enumerate(ls[hi:], hi + 1):
+                    c = [x.strip() for x in s_.split(" | ")]
+                    if len(c) <= max(ix["awb"], ix["event"], ix["date"]):
+                        continue
+                    d = parse_date(c[ix["date"]])
+                    if not d:
+                        continue
+                    rs = c[ix["reason"]] if ix["reason"] is not None and ix["reason"] < len(c) else None
+                    if rs and (parse_date(rs) or rs in ("-", "")):
+                        rs = None
+                    st = c[ix["station"]] if ix["station"] is not None and ix["station"] < len(c) else None
+                    if rs is None and ix["reason"] is not None and len(c) > ix["reason"] and st is None:
+                        rs = None
+                    evs.append({"awb": c[ix["awb"]], "event": canon_event(c[ix["event"]]), "date": d.isoformat(),
+                                "station": st, "reason": rs, "src": [p, i]})
+                return {"type": "tracking", "events": evs, "src": [p, hi]}
+            status = _col(hdr, "status")
+            if inv is not None and status is not None:
+                ix = {"id": inv, "date": _col(hdr, "invoice date", "issued", "issue date", "doc date", "document date",
+                                              "bill date"),
+                      "due": _col(hdr, "due"), "amount": _col(hdr, "amount", "total", "value"),
+                      "cur": _col(hdr, "currency", "ccy"), "status": status,
+                      "paid": _col(hdr, "paid", "payment date", "settled on", "cleared on", avoid=("status",))}
+                rows = []
+                for i, s_ in enumerate(ls[hi:], hi + 1):
+                    c = [x.strip() for x in s_.split(" | ")]
+                    if len(c) < 3:
+                        continue
+                    g = lambda k: c[ix[k]] if ix[k] is not None and ix[k] < len(c) else None  # noqa: E731
+                    amt = g("amount") or ""
+                    cur = g("cur") or (re.search(r"\b[A-Z]{3}\b", amt) or [None])[0]
+                    pd_ = parse_date(g("paid")) if g("paid") else None
+                    rows.append({"invoice_id": g("id"),
+                                 "invoice_date": parse_date(g("date")).isoformat() if parse_date(g("date")) else None,
+                                 "due_date": parse_date(g("due")).isoformat() if parse_date(g("due")) else None,
+                                 "currency": cur, "amount": str(D(amt)) if D(amt) is not None else None,
+                                 "status": canon_status(g("status")), "paid_date": pd_.isoformat() if pd_ else None,
+                                 "src": [p, i]})
+                m = re.search(r"\d{4}-\d{2}-\d{2}", doc["name"] + " " + doc["meta"].get("subject", ""))
+                return {"type": "ledger", "as_of": m[0] if m else doc["received"], "rows": rows, "src": [p, hi]}
     return None
 
 
@@ -885,6 +962,8 @@ def read(doc: dict, labels: dict[str, str]) -> list[dict]:
              "awb": read_awb, "dgd": read_dgd, "table": read_table, "annex": read_annex}.get(kind)
         if f:
             r = f(doc)
+            if r is None and kind == "table":
+                r = read_invoice(doc, labels)
             return [r] if r else []
         if kind in ("invoice", "other"):
             r = read_invoice(doc, labels)

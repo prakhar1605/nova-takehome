@@ -1,0 +1,12 @@
+name: 'feedback rejects a finding: it must go'
+mailbox: evals/mailboxes/velloran
+as_of: '2041-06-30'
+mode: supervised
+feedback:
+  batch_01: evals/feedback/velloran_reject.json
+expect:
+  key:
+    invoice_id: VC-41-0107
+    class: overcharge
+  verdict: no_finding
+why: reject

@@ -1,0 +1,11 @@
+name: Q1 gross billing passes the tier only if duties are counted
+mailbox: evals/mailboxes/velloran
+as_of: '2041-06-30'
+mode: supervised
+expect:
+  key:
+    contract_id: VLC-US-EXP-07
+    period: 2041-Q1
+    credit_type: rebate
+  verdict: no_finding
+why: gross 40862.93 but qualifying spend 35862.93 < 40,000

@@ -46,8 +46,8 @@ def pct_of(pct: Decimal, base: Decimal) -> Decimal:
 MONTHS = {m.lower(): i for i, m in enumerate(calendar.month_abbr) if m}
 MONTHS.update({m.lower(): i for i, m in enumerate(calendar.month_name) if m})
 
-ISO_RE = re.compile(r"\b(\d{4})-(\d{2})-(\d{2})\b")
-SLASH_RE = re.compile(r"\b(\d{1,2})/(\d{1,2})/(\d{4})\b")
+ISO_RE = re.compile(r"(?<!\d)(\d{4})-(\d{2})-(\d{2})(?!\d)")
+SLASH_RE = re.compile(r"\b(\d{1,2})[/.](\d{1,2})[/.](\d{4})\b")
 DMY_RE = re.compile(r"\b(\d{1,2})[ -]([A-Za-z]{3,9})\.?[ -](\d{4})\b")
 MDY_RE = re.compile(r"\b([A-Za-z]{3,9})\.? (\d{1,2}),? (\d{4})\b")
 
@@ -87,6 +87,21 @@ def parse_date(s, dayfirst: bool = True) -> date | None:
             return date(int(m[3]), MONTHS[m[1].lower()], int(m[2]))
         except ValueError:
             return None
+    return None
+
+
+def month_of(s) -> str | None:
+    """'March 2041' / 'Mar 2041' / '2041-03' / '03/2041' -> '2041-03'."""
+    s = str(s or "")
+    m = re.search(r"\b([A-Za-z]{3,9})\.?,? (\d{4})\b", s)
+    if m and m[1].lower() in MONTHS:
+        return f"{int(m[2]):04d}-{MONTHS[m[1].lower()]:02d}"
+    m = re.search(r"(?<!\d)(\d{4})-(\d{2})(?![-\d])", s)
+    if m:
+        return f"{m[1]}-{m[2]}"
+    m = re.search(r"(?<![\d/])(\d{1,2})/(\d{4})(?!\d)", s)
+    if m and 1 <= int(m[1]) <= 12:
+        return f"{m[2]}-{int(m[1]):02d}"
     return None
 
 

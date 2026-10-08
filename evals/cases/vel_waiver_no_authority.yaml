@@ -1,0 +1,10 @@
+name: the KAM 'waives' storage but has no waiver authority
+mailbox: evals/mailboxes/velloran
+as_of: '2041-03-31'
+mode: supervised
+expect:
+  key:
+    invoice_id: VC-41-0104
+    class: waived_but_billed
+  verdict: no_finding
+why: Schedule 1 is exhaustive; Mira Okonkwo holds notices only

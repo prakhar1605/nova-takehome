@@ -1,0 +1,12 @@
+name: overdue interest on an invoice paid inside the 7-day grace
+mailbox: evals/mailboxes/velloran
+as_of: '2041-06-30'
+mode: supervised
+expect:
+  key:
+    invoice_id: VC-41-0110
+    class: late_fee_not_owed
+  verdict: finding
+  amount_usd: '20.85'
+  action: draft:dispute
+why: paid 4 days after due; clause 10.2 grace is 7 days

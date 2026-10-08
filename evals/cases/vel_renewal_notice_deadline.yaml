@@ -1,0 +1,12 @@
+name: 'auto-renewing contract: the alert is the non-renewal notice deadline'
+mailbox: evals/mailboxes/velloran
+as_of: '2041-06-30'
+mode: supervised
+expect:
+  key:
+    contract_id: VLC-US-EXP-07
+    class: expiry
+  verdict: finding
+  action: internal:alert
+  deadline: '2041-07-02'
+why: 'term ends 2041-08-31, 60 days'' notice: deadline 2041-07-02'

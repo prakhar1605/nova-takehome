@@ -1,0 +1,12 @@
+name: the amendment adds a freight overcharge to an existing DG finding
+mailbox: evals/mailboxes/velloran
+as_of: '2041-06-30'
+mode: supervised
+expect:
+  key:
+    invoice_id: VC-41-0105
+    class: overcharge
+  verdict: finding
+  amount_usd: '153.68'
+  action: draft:dispute
+why: 140.00 DG fee plus 40 kg at 3.88 vs 3.60 and its fuel

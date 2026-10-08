@@ -1,0 +1,12 @@
+name: fuel line billed again as 'Fuel adj.', partly credited
+mailbox: evals/mailboxes/velloran
+as_of: '2041-06-30'
+mode: supervised
+expect:
+  key:
+    invoice_id: VC-41-0111
+    class: duplicate
+  verdict: finding
+  amount_usd: '101.37'
+  action: draft:dispute
+why: same AWB + Annex E code; overlap minus the 50.00 credit

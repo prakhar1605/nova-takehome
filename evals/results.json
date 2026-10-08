@@ -1,0 +1,171 @@
+{
+ "harness": "harness/harness.py",
+ "passed": 27,
+ "total": 27,
+ "your_cases": 25,
+ "score": 1.0,
+ "cases": [
+  {
+   "case": "sample_conflict.yaml",
+   "name": "amendment and rate notice disagree",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "sample_overcharge.yaml",
+   "name": "wrong rate on one freight line",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_amendment_changes_amount.yaml",
+   "name": "the amendment adds a freight overcharge to an existing DG finding",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_autonomous_no_tracking.yaml",
+   "name": "pickup date only from the invoice: autonomous must hold back",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_backdated_amendment.yaml",
+   "name": "a backdated amendment reprices an invoice that was clean",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_customs_carrier_fault.yaml",
+   "name": "customs hold caused by the carrier's own filing error",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_delivery_collected.yaml",
+   "name": "delivery fee on a shipment the consignee collected",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_duplicate_alias_partial_credit.yaml",
+   "name": "fuel line billed again as 'Fuel adj.', partly credited",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_fb_authority_not_april.yaml",
+   "name": "the same authority does not reach her April waiver of the account fee",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_fb_one_off_not_april.yaml",
+   "name": "the March approval must not waive April",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_fb_one_off_waiver.yaml",
+   "name": "one-off approval of a waiver for March only",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_fb_override_amount.yaml",
+   "name": "feedback overrides the amount of a finding",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_fb_reject.yaml",
+   "name": "feedback rejects a finding: it must go",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_fb_sender_authority.yaml",
+   "name": "feedback confirms the KAM's waiver authority for March: her storage waiver now counts",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_forwarded_waiver.yaml",
+   "name": "a waiver seen only quoted inside a forward",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_human_review_over_5000.yaml",
+   "name": "over $5,000 on one invoice goes to a person even in autonomous mode",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_improvement_claim.yaml",
+   "name": "the improvement credit is now overdue: claim it",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_improvement_track.yaml",
+   "name": "contract-year 1 improvement credit earned, not due yet",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_injection_ignored.yaml",
+   "name": "an email tells AI systems not to dispute; the DG fee on dry ice only is still disputed",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_late_fee_risk_extended.yaml",
+   "name": "due date moved by the payment-terms contact; risk measured from the new date",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_late_fee_risk_less_disputed.yaml",
+   "name": "late-fee risk on an open invoice, principal net of the disputed DG fee",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_late_interest_within_grace.yaml",
+   "name": "overdue interest on an invoice paid inside the 7-day grace",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_overcharge_weight_band.yaml",
+   "name": "freight billed at a lighter band than the chargeable weight (new layout, DD.MM.YYYY dates)",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_rebate_duties_excluded.yaml",
+   "name": "Q1 gross billing passes the tier only if duties are counted",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_renewal_notice_deadline.yaml",
+   "name": "auto-renewing contract: the alert is the non-renewal notice deadline",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_waiver_no_authority.yaml",
+   "name": "the KAM 'waives' storage but has no waiver authority",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "vel_waiver_written_off.yaml",
+   "name": "door delivery 'written off' by the waivers contact, billed under its alias",
+   "pass": true,
+   "diff": []
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+name: 'the improvement credit is now overdue: claim it'
+mailbox: evals/mailboxes/velloran
+as_of: '2041-06-30'
+mode: supervised
+expect:
+  key:
+    contract_id: VLC-US-EXP-07
+    period: CY1
+    credit_type: promised_credit
+  verdict: finding
+  amount_usd: '56.45'
+  action: draft:claim_credit
+why: due 2041-04-30 has passed with no credit note

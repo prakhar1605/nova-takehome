@@ -91,7 +91,7 @@ class Checks:
             row, ldoc, _ = w.ledger_row(iid)
             if not row:
                 continue
-            status = str(row.get("status") or "").lower()
+            status = w.status(row)
             paid = parse_date(row.get("paid_date"))
             for doc, f in copies[1:]:
                 if doc.email == first_doc.email:
@@ -100,8 +100,7 @@ class Checks:
                 asks = True if cv is None else bool(cv[1].get("asks_payment")) and not cv[1].get("copy")
                 if not asks:
                     continue
-                ok = (status == "paid" and paid is not None and paid <= doc.received) or status in ("scheduled",
-                                                                                                    "approved")
+                ok = (status == "paid" and paid is not None and paid <= doc.received) or status == "scheduled"
                 if not ok:
                     continue
                 c = w.contract_for_invoice(inv)
@@ -346,6 +345,8 @@ class Checks:
         w = self.w
         best, evs, learned = None, [], None
         for doc, ext in w.extensions.get(norm_invoice(iid), []):
+            if ext.get("quoted"):
+                continue
             c = w.contract(cf.get("contract_id")) if cf else None
             ok, who, how = w.authorised(cf, doc, "payment_terms", feedback=self.fb) if cf else (False, None, "none")
             if ok and parse_date(ext.get("new_due_date")):
@@ -407,7 +408,7 @@ class Checks:
                 if due is None:
                     continue
                 if paid is None:
-                    if str((xrow or {}).get("status") or "").lower() == "paid" or not xrow:
+                    if w.status(xrow) == "paid" or not xrow:
                         continue
                     paid = parse_date(inv.get("invoice_date")) or doc.received
                 late_days = (paid - due).days
@@ -435,8 +436,7 @@ class Checks:
         for iid, (doc, inv) in self.unique.items():
             row, ldoc, lasof = w.ledger_row(iid)
             if row:
-                if str(row.get("status") or "").lower() not in ("open", "unpaid", "outstanding", "due", "overdue",
-                                                                "scheduled", "approved", "partially paid"):
+                if w.status(row) not in ("open", "disputed"):
                     continue
             elif latest is not None and latest >= doc.received:
                 continue                     # the ledger postdates the invoice and doesn't list it: don't guess
@@ -568,6 +568,60 @@ class Checks:
                             self.add(it)
                     n += 1
 
+    def margin_step_down(self):
+        """A handling margin that should have stepped down: per quarter, every invoice after the one whose spend
+        crossed the threshold should carry the lower margin. One cashback item per quarter, never per invoice."""
+        w = self.w
+        for cid, (cdoc, cf) in w.contracts.items():
+            mg = cf.get("margin") or {}
+            step, th = D(mg.get("step_down_pct")), D(mg.get("threshold_usd"))
+            if step is None or th is None:
+                continue
+            quarters = defaultdict(list)
+            for iid, (doc, inv) in self.unique.items():
+                c = w.contract_for_invoice(inv)
+                d = parse_date(inv.get("invoice_date"))
+                if c and c[1].get("contract_id") == cid and d:
+                    quarters[quarter_of(d)].append((d, doc.received_at, iid, doc, inv))
+            cl = cf.get("clauses") or {}
+            for q, invs in quarters.items():
+                qs_, qe = quarter_bounds(q)
+                if qe >= w.as_of:
+                    continue
+                invs.sort(key=lambda x: (x[0], x[1]))
+                cum, crossed, owed, evs = ZERO, False, ZERO, []
+                for d, _, iid, doc, inv in invs:
+                    if crossed:
+                        for ln in inv.get("lines") or []:
+                            if w.code_of(ln, cf) == "MARGIN" and D(ln.get("base")) is not None:
+                                correct = pct_of(step, D(ln["base"]))
+                                billed = D(ln.get("amount")) or ZERO
+                                if billed > correct:
+                                    u, _, _ = self.usd(cf, inv, billed - correct)
+                                    owed += u or ZERO
+                                    evs.append(w.ev(doc, ln.get("src")))
+                    spend = ZERO
+                    for ln in inv.get("lines") or []:
+                        code = w.code_of(ln, cf)
+                        if mg.get("basis") == "cost":
+                            if code == "COST":
+                                spend += D(ln.get("amount")) or ZERO
+                        elif code not in ("DUTY", "TAX", "LATE") and not ln.get("late_fee"):
+                            spend += D(ln.get("amount")) or ZERO
+                    u, _, _ = self.usd(cf, inv, spend)
+                    cum += u or ZERO
+                    if not crossed and cum >= th:
+                        crossed = True
+                        evs.append(w.ev(doc, inv.get("src")))
+                got, cev = self.credits_issued(cid, q, "margin_step_down")
+                owed -= got
+                if owed > 0:
+                    ev = _evs(w.ev(cdoc, cl.get("margin_step") or cl.get("margin")), evs, cev)
+                    it = self._mk(("cashback", cid, q, "margin_step_down"), "claim_credit", ev, (cdoc, cf),
+                                  amount=r2(owed), conf=0.85)
+                    it.update(contract_id=cid, period=q, credit_type="margin_step_down")
+                    self.add(it)
+
     # ---- expiry -----------------------------------------------------------------------------------------------------
     def expiry(self):
         w = self.w
@@ -610,6 +664,7 @@ class Checks:
         self.overcharges()
         self.late_fees()
         self.cashback()
+        self.margin_step_down()
         self.expiry()
         self.late_fee_risk()
         return self.items

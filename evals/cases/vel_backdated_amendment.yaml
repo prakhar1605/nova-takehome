@@ -1,0 +1,12 @@
+name: a backdated amendment reprices an invoice that was clean
+mailbox: evals/mailboxes/velloran
+as_of: '2041-06-30'
+mode: supervised
+expect:
+  key:
+    invoice_id: VC-41-0102
+    class: overcharge
+  verdict: finding
+  amount_usd: '87.98'
+  action: draft:dispute
+why: 'AMD-1 (signed 2041-04-25) is effective from 2041-01-15: 2.99 for 260 kg'

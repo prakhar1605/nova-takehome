@@ -1,0 +1,14 @@
+name: one-off approval of a waiver for March only
+mailbox: evals/mailboxes/velloran
+as_of: '2041-06-30'
+mode: supervised
+feedback:
+  batch_02: evals/feedback/velloran_oneoff.json
+expect:
+  key:
+    invoice_id: VC-ST-204103
+    class: waived_but_billed
+  verdict: finding
+  amount_usd: '400.00'
+  action: draft:dispute
+why: one_off_approval waiver_scope 2041-03 on this key

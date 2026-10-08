@@ -125,8 +125,8 @@ def rate_for(world, cdoc, cf, lane, w, d, fb, key=None):
     # 2. rate notices
     notice = None
     for ndoc, n in world.notices:
-        if n.get("contract_id") not in (None, cid):
-            continue
+        if n.get("contract_id") not in (None, cid) or n.get("quoted"):
+            continue                                   # quoted / forwarded text is not a notice
         nrows = _band_rows(n.get("rates") or [], lane)
         if not nrows:
             continue

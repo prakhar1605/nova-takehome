@@ -1,0 +1,12 @@
+name: freight billed at a lighter band than the chargeable weight (new layout, DD.MM.YYYY dates)
+mailbox: evals/mailboxes/velloran
+as_of: '2041-03-31'
+mode: supervised
+expect:
+  key:
+    invoice_id: VC-41-0101
+    class: overcharge
+  verdict: finding
+  amount_usd: '76.86'
+  action: draft:dispute
+why: 120 kg sits in 100-299.5 (5.52), not 45-99.5 (6.05); fuel rides on it

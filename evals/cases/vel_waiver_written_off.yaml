@@ -1,0 +1,12 @@
+name: door delivery 'written off' by the waivers contact, billed under its alias
+mailbox: evals/mailboxes/velloran
+as_of: '2041-03-31'
+mode: supervised
+expect:
+  key:
+    invoice_id: VC-41-0103
+    class: waived_but_billed
+  verdict: finding
+  amount_usd: '98.50'
+  action: draft:dispute
+why: Hanne Vos holds waivers in Schedule 1; 'Door delivery' is Annex E's DLV

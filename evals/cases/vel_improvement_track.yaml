@@ -1,0 +1,13 @@
+name: contract-year 1 improvement credit earned, not due yet
+mailbox: evals/mailboxes/velloran
+as_of: '2041-03-31'
+mode: supervised
+expect:
+  key:
+    contract_id: VLC-US-EXP-07
+    period: CY1
+    credit_type: promised_credit
+  verdict: finding
+  amount_usd: '56.45'
+  action: internal:track_credit
+why: CY1 ended 2041-02-28; credit due within 60 days of 2041-03-01

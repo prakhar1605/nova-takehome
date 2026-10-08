@@ -1,0 +1,12 @@
+name: a waiver seen only quoted inside a forward
+mailbox: evals/mailboxes/velloran
+as_of: '2041-06-30'
+mode: supervised
+expect:
+  key:
+    invoice_id: VC-41-0112
+    class: waived_but_billed
+  verdict: cannot_determine
+  action: draft:request_document
+  missing_doc: original email
+why: 'quoted text has no authority on its own: ask for the original'

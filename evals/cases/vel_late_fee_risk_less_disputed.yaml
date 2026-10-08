@@ -1,0 +1,13 @@
+name: late-fee risk on an open invoice, principal net of the disputed DG fee
+mailbox: evals/mailboxes/velloran
+as_of: '2041-03-31'
+mode: supervised
+expect:
+  key:
+    invoice_id: VC-41-0105
+    class: late_fee_risk
+  verdict: finding
+  amount_usd: '5.15'
+  action: internal:payment_reminder
+  deadline: '2041-04-07'
+why: due 2041-04-07 is 7 days out; 2.10% of (total - 140.00)

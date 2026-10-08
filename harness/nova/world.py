@@ -258,7 +258,12 @@ class World:
                     best = (key, d, self.ev(doc, row.get("src")))
         return (best[1], best[2]) if best else (None, None)
 
-    # ---- the payment ledger -----------------------------------------------------------------------------------------
+    # ---- the payment ledger ----
+    @staticmethod
+    def status(row) -> str:
+        from .rules_reader import canon_status
+        return canon_status(str((row or {}).get("status") or ""))
+
     def ledger_row(self, invoice_id: str):
         """The newest ledger row for an invoice -> (row, doc, ledger as_of) or (None, None, None)."""
         want = norm_invoice(invoice_id)

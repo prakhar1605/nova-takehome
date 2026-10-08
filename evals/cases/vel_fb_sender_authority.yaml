@@ -1,0 +1,14 @@
+name: 'feedback confirms the KAM''s waiver authority for March: her storage waiver now counts'
+mailbox: evals/mailboxes/velloran
+as_of: '2041-06-30'
+mode: supervised
+feedback:
+  batch_01: evals/feedback/velloran_authority.json
+expect:
+  key:
+    invoice_id: VC-41-0104
+    class: waived_but_billed
+  verdict: finding
+  amount_usd: '93.00'
+  action: draft:dispute
+why: confirm + sender_authority, standing for waivers on this contract in March 2041

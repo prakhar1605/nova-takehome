@@ -1,0 +1,43 @@
+{
+ "schema_version": "1.0",
+ "world": "VEL",
+ "decided_by": {
+  "name": "Owen Lusk",
+  "role": "AP Manager",
+  "entity": "BRB-US"
+ },
+ "after_batch": "batch_02",
+ "decided_at": "2041-07-01T09:00:00Z",
+ "items": [
+  {
+   "item_id": "vfb-03",
+   "finding_key": {
+    "invoice_id": "VC-ST-204103",
+    "class": "waived_but_billed"
+   },
+   "solicited": false,
+   "decision": "one_off_approval",
+   "fact": {
+    "type": "waiver_scope",
+    "subject": {
+     "person": "Mira Okonkwo",
+     "party": "VLC-US"
+    },
+    "value": {
+     "months": [
+      "2041-03"
+     ]
+    },
+    "evidence": "Hanne Vos confirmed the March waiver by phone"
+   },
+   "scope": {
+    "kind": "one_off",
+    "applies_to": {
+     "invoice_id": "VC-ST-204103"
+    },
+    "valid_from": "2041-07-01",
+    "valid_to": null
+   }
+  }
+ ]
+}

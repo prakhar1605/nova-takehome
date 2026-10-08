@@ -1,0 +1,12 @@
+name: the March approval must not waive April
+mailbox: evals/mailboxes/velloran
+as_of: '2041-06-30'
+mode: supervised
+feedback:
+  batch_02: evals/feedback/velloran_oneoff.json
+expect:
+  key:
+    invoice_id: VC-ST-204104
+    class: waived_but_billed
+  verdict: no_finding
+why: a one-off decision changes its own key only

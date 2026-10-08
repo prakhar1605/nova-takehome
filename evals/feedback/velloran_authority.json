@@ -1,0 +1,45 @@
+{
+ "schema_version": "1.0",
+ "world": "VEL",
+ "decided_by": {
+  "name": "Owen Lusk",
+  "role": "AP Manager",
+  "entity": "BRB-US"
+ },
+ "after_batch": "batch_01",
+ "decided_at": "2041-04-02T09:00:00Z",
+ "items": [
+  {
+   "item_id": "vfb-04",
+   "finding_key": {
+    "invoice_id": "VC-41-0104",
+    "class": "waived_but_billed"
+   },
+   "solicited": false,
+   "decision": "confirm",
+   "fact": {
+    "type": "sender_authority",
+    "subject": {
+     "person": "Mira Okonkwo",
+     "party": "VLC-US"
+    },
+    "value": {
+     "categories": [
+      "waivers"
+     ]
+    },
+    "evidence": "Velloran delegation letter seen by AP"
+   },
+   "scope": {
+    "kind": "standing",
+    "applies_to": {
+     "contract_id": "VLC-US-EXP-07",
+     "person": "Mira Okonkwo",
+     "category": "waivers"
+    },
+    "valid_from": "2041-03-01",
+    "valid_to": "2041-03-31"
+   }
+  }
+ ]
+}

@@ -448,14 +448,14 @@
       {
        "step": "ingest",
        "rc": 0,
-       "stderr": "[ingest] 82 new document(s) from /tmp/grader-co6scnim/run/box/mailbox/batch_01\n[ingest] done\n",
-       "secs": 1.1
+       "stderr": "[ingest] 82 new document(s) from /tmp/grader-3dx_qiqg/run/box/mailbox/batch_01\n[ingest] done\n",
+       "secs": 1.2
       },
       {
        "step": "report",
        "rc": 0,
        "stderr": "",
-       "secs": 0.3
+       "secs": 0.2
       },
       {
        "step": "feedback",
@@ -474,14 +474,14 @@
       {
        "step": "ingest",
        "rc": 0,
-       "stderr": "[ingest] 81 new document(s) from /tmp/grader-co6scnim/run/box/mailbox/batch_02\n[ingest] done\n",
-       "secs": 5.8
+       "stderr": "[ingest] 81 new document(s) from /tmp/grader-3dx_qiqg/run/box/mailbox/batch_02\n[ingest] done\n",
+       "secs": 5.4
       },
       {
        "step": "report",
        "rc": 0,
        "stderr": "",
-       "secs": 0.6
+       "secs": 0.5
       }
      ],
      "items": 17
@@ -498,14 +498,14 @@
       {
        "step": "ingest",
        "rc": 0,
-       "stderr": "[ingest] 82 new document(s) from /tmp/grader-a4hewx5o/run/box/mailbox/batch_01\n[ingest] done\n",
-       "secs": 1.3
+       "stderr": "[ingest] 82 new document(s) from /tmp/grader-gz2tqtnd/run/box/mailbox/batch_01\n[ingest] done\n",
+       "secs": 1.0
       },
       {
        "step": "report",
        "rc": 0,
        "stderr": "",
-       "secs": 0.3
+       "secs": 0.2
       },
       {
        "step": "feedback",
@@ -524,14 +524,14 @@
       {
        "step": "ingest",
        "rc": 0,
-       "stderr": "[ingest] 81 new document(s) from /tmp/grader-a4hewx5o/run/box/mailbox/batch_02\n[ingest] done\n",
-       "secs": 5.3
+       "stderr": "[ingest] 81 new document(s) from /tmp/grader-gz2tqtnd/run/box/mailbox/batch_02\n[ingest] done\n",
+       "secs": 5.7
       },
       {
        "step": "report",
        "rc": 0,
        "stderr": "",
-       "secs": 0.5
+       "secs": 0.4
       }
      ],
      "items": 17

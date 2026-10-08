@@ -1,0 +1,12 @@
+name: customs hold caused by the carrier's own filing error
+mailbox: evals/mailboxes/velloran
+as_of: '2041-03-31'
+mode: supervised
+expect:
+  key:
+    invoice_id: VC-41-0106
+    class: overcharge
+  verdict: finding
+  amount_usd: '210.00'
+  action: draft:dispute
+why: 'clause 6.3: carrier error makes the hold fee the carrier''s'

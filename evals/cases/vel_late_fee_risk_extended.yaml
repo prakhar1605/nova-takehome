@@ -1,0 +1,13 @@
+name: due date moved by the payment-terms contact; risk measured from the new date
+mailbox: evals/mailboxes/velloran
+as_of: '2041-06-30'
+mode: supervised
+expect:
+  key:
+    invoice_id: VC-41-0113
+    class: late_fee_risk
+  verdict: finding
+  amount_usd: '43.37'
+  action: internal:payment_reminder
+  deadline: '2041-07-12'
+why: new due date 2041-07-12 is 12 days out

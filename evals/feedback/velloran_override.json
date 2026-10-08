@@ -1,0 +1,41 @@
+{
+ "schema_version": "1.0",
+ "world": "VEL",
+ "decided_by": {
+  "name": "Owen Lusk",
+  "role": "AP Manager",
+  "entity": "BRB-US"
+ },
+ "after_batch": "batch_01",
+ "decided_at": "2041-04-02T09:00:00Z",
+ "items": [
+  {
+   "item_id": "vfb-01",
+   "finding_key": {
+    "invoice_id": "VC-41-0101",
+    "class": "overcharge"
+   },
+   "solicited": true,
+   "decision": "override_amount",
+   "fact": {
+    "type": "dispute_closed",
+    "subject": {
+     "invoice_id": "VC-41-0101"
+    },
+    "value": {
+     "status": "settled",
+     "amount_usd": "60.00"
+    },
+    "evidence": "Settled with Velloran"
+   },
+   "scope": {
+    "kind": "one_off",
+    "applies_to": {
+     "invoice_id": "VC-41-0101"
+    },
+    "valid_from": "2041-04-02",
+    "valid_to": null
+   }
+  }
+ ]
+}

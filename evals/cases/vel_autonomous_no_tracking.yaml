@@ -1,0 +1,12 @@
+name: 'pickup date only from the invoice: autonomous must hold back'
+mailbox: evals/mailboxes/velloran
+as_of: '2041-03-31'
+mode: autonomous
+expect:
+  key:
+    invoice_id: VC-41-0109
+    class: overcharge
+  verdict: finding
+  amount_usd: '75.71'
+  action: human_review
+why: the unattended test wants the pickup date from tracking or a carrier pickup email
