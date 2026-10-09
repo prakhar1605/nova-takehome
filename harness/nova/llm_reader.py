@@ -83,6 +83,14 @@ TOOLS = [
              "tiers": {"type": "array", "items": {"type": "object", "properties": {
                  "min_usd": NUM, "pct": NUM}}},
              "credit_days": {"type": ["integer", "null"], "description": "days after quarter end the credit is due"}}},
+         "promised_credits": {"type": "array", "description": "any OTHER credit the contract promises (not the "
+                              "quarterly volume rebate or the annual improvement credit), e.g. a one-time credit",
+                              "items": {"type": "object", "properties": {
+                                  "description": {"type": "string"}, "amount_usd": NUM,
+                                  "pct_of_qs": {**NUM, "description": "if it is a percentage of qualifying spend"},
+                                  "contract_year": {"type": ["integer", "null"], "description": "1 for the first year"},
+                                  "due_date": DATE, "due_days_after_year_end": {"type": ["integer", "null"]},
+                                  "src": SRC}}},
          "improvement": {"type": ["object", "null"], "description": "an annual credit promised per contract year",
                          "properties": {"pct": NUM, "due_days": {"type": ["integer", "null"]}}},
          "margin": {"type": ["object", "null"], "description": "handling margin terms, null if not applicable",
@@ -444,6 +452,7 @@ class LLMReader:
                 rows("aliases", ())
                 rows("schedule1", ())
                 rows("periods", ())
+                rows("promised_credits", ("amount_usd",))
                 for p in f.get("schedule1") or []:
                     p["email"] = str(p.get("email") or "").lower()
             if t == "annex":

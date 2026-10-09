@@ -54,7 +54,8 @@ What the agent did between prompts, in short:
 2. Built the text layer (a copy of the grader's reader), the rules reader, the world model, pricing, the checks,
    feedback, and report building. Practice 99.9 with the rules reader; exam sheet hand-checked.
 3. Wrote the LLM reader (tool schemas, number check against the cited line, table mapping, cache, fallback). Built
-   the Velloran eval world and 25 cases, fixed the three bugs they caught, and reached 27/27.
+   the Velloran eval world and 25 cases, fixed the three bugs they caught, and reached 27/27. Later added the
+   Kestrel world (3 handling-margin cases).
 4. With the key: fixed the `tool_choice` and streaming errors, ran practice (92.1 → found and fixed the two
    misreadings → 99.9), the exam sheet (same as the rules reader) and the evals (27/27), compared the readers
    field by field, and measured cost with the cache off ($0.93 for 86 documents).

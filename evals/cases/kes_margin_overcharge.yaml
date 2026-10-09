@@ -1,0 +1,12 @@
+name: handling margin billed above the contract percentage
+mailbox: evals/mailboxes/kestrel
+as_of: '2041-07-31'
+mode: supervised
+expect:
+  key:
+    invoice_id: KF-2041-105
+    class: overcharge
+  verdict: finding
+  amount_usd: '90.00'
+  action: draft:dispute
+why: '15% billed where clause 8.1 allows 12%: 3% of 3,000'

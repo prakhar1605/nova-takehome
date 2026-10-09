@@ -78,5 +78,5 @@ make no model calls.
   fit the deductions to those errors.
 - Chunk very long contracts by page instead of one call.
 - Evaluate a waiver condition in general, not only "paid by date".
-- Test margin step-down, which is built from the glossary but has no example in the data.
+- Test margin step-down on more wordings than my one Kestrel contract.
 - What I am least sure about: the hidden set's feedback kinds, and how its graders name missing originals.

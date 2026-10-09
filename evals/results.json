@@ -1,10 +1,28 @@
 {
  "harness": "harness/harness.py",
- "passed": 27,
- "total": 27,
- "your_cases": 25,
+ "passed": 30,
+ "total": 30,
+ "your_cases": 28,
  "score": 1.0,
  "cases": [
+  {
+   "case": "kes_margin_overcharge.yaml",
+   "name": "handling margin billed above the contract percentage",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "kes_margin_step_down.yaml",
+   "name": "handling margin not stepped down after the quarter's cost reached the threshold (one item for the quarter)",
+   "pass": true,
+   "diff": []
+  },
+  {
+   "case": "kes_stepped_invoice_not_overcharge.yaml",
+   "name": "an invoice owed the step-down is not also an overcharge",
+   "pass": true,
+   "diff": []
+  },
   {
    "case": "sample_conflict.yaml",
    "name": "amendment and rate notice disagree",

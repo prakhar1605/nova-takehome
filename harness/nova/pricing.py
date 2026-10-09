@@ -18,7 +18,7 @@ from decimal import Decimal
 
 from .util import D, ZERO, norm_label, parse_date, r2, ym
 
-PRICED = {"FRT", "FUEL", "SEC", "PEAK", "DG", "DRYICE", "STOR", "DLV", "CUSTOMS", "ACCT", "SPROG", "PPROG"}
+PRICED = {"FRT", "FUEL", "SEC", "PEAK", "DG", "DRYICE", "STOR", "DLV", "CUSTOMS", "ACCT", "SPROG", "PPROG", "MARGIN"}
 DATE_DEPENDENT = {"FRT", "FUEL", "PEAK", "SEC"}
 
 
@@ -89,6 +89,19 @@ def rate_for(world, cdoc, cf, lane, w, d, fb, key=None):
         if band:
             msa = RateSource("msa", _row_rate(band, period), _row_rate(mn, period),
                              [world.ev(cdoc, band.get("src")), world.ev(cdoc, cl.get("pricing_date"))], 1, name=cid)
+    if msa is None:
+        # the MSA's own rate annex delivered as a separate document (not brought in by an amendment)
+        for ndoc, an in world.annexes:
+            if an.get("contract_id") != cid:
+                continue
+            f_ = parse_date(an.get("effective_from"))
+            arows = _band_rows(an.get("rates") or [], lane)
+            if arows and (f_ is None or f_ <= d):
+                band, mn = pick_band(arows, w)
+                if band:
+                    msa = RateSource("msa", _row_rate(band, period), _row_rate(mn, period) if mn else None,
+                                     [world.ev(ndoc, band.get("src")), world.ev(cdoc, cl.get("pricing_date"))], 1,
+                                     name=an.get("name"))
     # 1. amendments and their annexes
     amd = None
     for adoc, a in world.amendments:
@@ -350,6 +363,17 @@ def price_invoice(world, inv_doc, inv: dict, fb, key=None) -> dict:
                         cev = cev or world.ev(edoc, row.get("src"))
                 r["correct"] = ZERO if fault == "carrier" else D(a["fee"])
                 r["evs"] = [cev, world.ev(cdoc, cl.get("customs"))]
+            elif code == "MARGIN":
+                # the handling margin at the contract percentage of the cost it rides on (a step-down is a
+                # cashback item, never an overcharge, so only the base percentage is checked here)
+                mg = cf.get("margin") or {}
+                base = D(ln.get("base"))
+                if base is None:
+                    base = sum((D(x.get("amount")) or ZERO for x, cx in zip(group, codes) if cx == "COST"), ZERO) or None
+                if D(mg.get("pct")) is None or base is None:
+                    continue
+                r["correct"] = r2(D(mg["pct"]) / 100 * base)
+                r["evs"] = [world.ev(cdoc, cl.get("margin"))]
             elif code in ("ACCT", "SPROG", "PPROG") or accessorial(cf, code):
                 a = accessorial(cf, code)
                 if not a:

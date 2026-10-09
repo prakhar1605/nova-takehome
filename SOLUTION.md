@@ -7,7 +7,7 @@ make setup                         # .venv from harness/requirements.txt; nothin
 export ANTHROPIC_API_KEY=...       # the LLM reader; ANTHROPIC_BASE_URL is honoured if set
 make grade                         # practice mailbox, both modes -> report_card.txt / .json
 make sheet                         # exam mailbox -> out/exam_report.json, answer_sheet.json
-make eval                          # evals/cases (27 cases, 25 of mine)
+make eval                          # evals/cases (30 cases, 28 of mine)
 python tools/compare_readers.py out/state_exam   # where the LLM and rules readers disagree
 ```
 
@@ -16,7 +16,7 @@ The model is `claude-sonnet-5-5` (override with `NOVA_MODEL`). Ingest uses 8 par
 no API key, or if a call fails, the rules reader reads that document instead, so the harness never stops on the
 model. `NOVA_READER=rules` forces the rules reader everywhere. Model answers are cached by prompt hash in the state
 folder (and in `harness/.llm_cache/` locally, gitignored), so re-running a batch costs nothing.
-`evals/build_velloran.py` regenerates my eval mailbox and cases.
+`evals/build_velloran.py` and `evals/build_kestrel.py` regenerate my eval mailboxes and cases.
 
 ## What works
 
@@ -26,14 +26,16 @@ folder (and in `harness/.llm_cache/` locally, gitignored), so re-running a batch
   The LLM and rules readers give the same sheet. Totals: overpayment $3,847.70, cashback $4,307.34, late fees
   avoided $10.29, total $8,165.33. One conflict (CDU-3051302) and one cannot_determine (CDU-3051286, Annex A rev 2,
   held by Joaquin Rathbone).
-- My eval set: **27 / 27** (`evals/results.json`). 25 cases run on a world I built (`evals/mailboxes/velloran`):
+- My eval set: **30 / 30** (`evals/results.json`), with the LLM reader and with the rules reader alone. 25 cases run on a world I built (`evals/mailboxes/velloran`):
   a new carrier, customer, people, lanes and invoice layout (DD.MM.YYYY dates, "22.10% of 726.00" fuel lines),
   renamed tracking and ledger columns, "written off" waivers, "may now be made up to … without penalty"
   extensions, overdue-interest lines, an auto-renewing contract, a prompt-injection email, a forwarded-only waiver,
   a waiver from someone without authority, a backdated amendment, a carrier-fault customs hold, a consignee
   collection, a partly credited duplicate, an invoice over $5,000, a pickup date known only from the invoice, and
   five feedback cases (override, reject, one-off waiver, standing authority, and two checks that feedback does not
-  spread).
+  spread). Three more (`evals/mailboxes/kestrel`) cover a forwarding contract with a handling margin: the margin
+  step-down owed for a quarter as one cashback item, a margin billed above the contract percentage, and a check that
+  a stepped-down invoice is not also reported as an overcharge.
 - All six classes, conflicts, cannot_determine, both modes with the unattended test, supersedes / retro /
   learned_at, and every feedback kind in the glossary.
 
@@ -43,8 +45,7 @@ folder (and in `harness/.llm_cache/` locally, gitignored), so re-running a batch
   calibrated.
 - A waiver condition is evaluated only when it is about payment by a date; any other condition makes the waiver not
   count yet (no finding).
-- Margin step-down (`credit_type: margin_step_down`) follows the glossary, but no document in the data has a
-  margin, so it is untested.
+- Margin step-down is tested only on my own Kestrel world, since nothing in the practice or exam data has a margin.
 - Chargeable weight comes from the AWB when we hold it, else as printed. We don't recompute volumetric weight from
   the dimensions.
 - One model call per document. A contract much longer than the ones here (11 pages) may need chunking.

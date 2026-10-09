@@ -76,7 +76,7 @@
     {
      "doc": "batch_01/0003.eml#MSA-CDA-US-EXP-E91.pdf",
      "page": 4,
-     "quote": "10.2 Late fee. Undisputed amounts outstanding for more than 0 days past the due date incur a late fee of 1.49% per month or part thereof. days_late = paid date - due date; no fee is due if days_late <= 0; otherwise n = ceil(days_late / 30) fee months, each fee_i = 1.49% x base_i rounded to cents, base_i per clause 10.3. 10.3 Compounding. Late fees unpaid at the end of a month are added to the overdue balance, and the next month's fee is charged on principal plus unpaid prior late fees. Fees shown paid leave the base."
+     "quote": "10.2 Late fee. Undisputed amounts outstanding for more than 0 days past the due date incur a late fee of 1.49% per month or part thereof. days_late = paid date - due date; no fee is due if days_late <= 0; otherwise n = ceil(days_late / 30) fee months, each fee_i = 1.49% x base_i rounded to cents, base_i per clause 10.3. 10.3 Compounding. Late fees unpaid at the end of a month are added to the overdue balance, and the next month's fee is charged on principal plus unpaid prior late fees. Fees shown paid leave the base. 10.4 Disputed amounts. No late fee accrues on amounts disputed in good faith under clause 13 while the dispute is open."
     }
    ],
    "missing_doc": null,
@@ -493,7 +493,7 @@
      {
       "doc": "batch_01/0003.eml#MSA-CDA-US-EXP-E91.pdf",
       "page": 3,
-      "quote": "2.2 Initial term. The initial term runs for 12 months and expires on 2031-04-01."
+      "quote": "2.1 Effective date. The Effective Date of this Agreement is 2030-04-02. 2.2 Initial term. The initial term runs for 12 months and expires on 2031-04-01."
      }
     ],
     "missing_doc": null,
@@ -523,7 +523,7 @@
      {
       "doc": "batch_01/0003.eml#MSA-CDA-US-EXP-E91.pdf",
       "page": 4,
-      "quote": "10.2 Late fee. Undisputed amounts outstanding for more than 0 days past the due date incur a late fee of 1.49% per month or part thereof. days_late = paid date - due date; no fee is due if days_late <= 0; otherwise n = ceil(days_late / 30) fee months, each fee_i = 1.49% x base_i rounded to cents, base_i per clause 10.3. 10.3 Compounding. Late fees unpaid at the end of a month are added to the overdue balance, and the next month's fee is charged on principal plus unpaid prior late fees. Fees shown paid leave the base."
+      "quote": "10.2 Late fee. Undisputed amounts outstanding for more than 0 days past the due date incur a late fee of 1.49% per month or part thereof. days_late = paid date - due date; no fee is due if days_late <= 0; otherwise n = ceil(days_late / 30) fee months, each fee_i = 1.49% x base_i rounded to cents, base_i per clause 10.3. 10.3 Compounding. Late fees unpaid at the end of a month are added to the overdue balance, and the next month's fee is charged on principal plus unpaid prior late fees. Fees shown paid leave the base. 10.4 Disputed amounts. No late fee accrues on amounts disputed in good faith under clause 13 while the dispute is open."
      }
     ],
     "missing_doc": null,

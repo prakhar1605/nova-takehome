@@ -448,58 +448,8 @@
       {
        "step": "ingest",
        "rc": 0,
-       "stderr": "[ingest] 82 new document(s) from /tmp/grader-dvfias62/run/box/mailbox/batch_01\n[ingest] done\n",
-       "secs": 2.3
-      },
-      {
-       "step": "report",
-       "rc": 0,
-       "stderr": "",
-       "secs": 0.2
-      },
-      {
-       "step": "feedback",
-       "rc": 0,
-       "stderr": "",
-       "secs": 0.0
-      }
-     ],
-     "items": 7
-    },
-    {
-     "batch": "batch_02",
-     "as_of": "2035-09-30",
-     "error": null,
-     "steps": [
-      {
-       "step": "ingest",
-       "rc": 0,
-       "stderr": "[ingest] 81 new document(s) from /tmp/grader-dvfias62/run/box/mailbox/batch_02\n[ingest] done\n",
-       "secs": 6.7
-      },
-      {
-       "step": "report",
-       "rc": 0,
-       "stderr": "",
-       "secs": 0.4
-      }
-     ],
-     "items": 17
-    }
-   ]
-  },
-  "autonomous": {
-   "W1": [
-    {
-     "batch": "batch_01",
-     "as_of": "2035-05-31",
-     "error": null,
-     "steps": [
-      {
-       "step": "ingest",
-       "rc": 0,
-       "stderr": "[ingest] 82 new document(s) from /tmp/grader-c146ryn3/run/box/mailbox/batch_01\n[ingest] done\n",
-       "secs": 2.3
+       "stderr": "[ingest] 82 new document(s) from /tmp/grader-hfd5iz1a/run/box/mailbox/batch_01\n[ingest] done\n",
+       "secs": 79.1
       },
       {
        "step": "report",
@@ -524,14 +474,64 @@
       {
        "step": "ingest",
        "rc": 0,
-       "stderr": "[ingest] 81 new document(s) from /tmp/grader-c146ryn3/run/box/mailbox/batch_02\n[ingest] done\n",
-       "secs": 6.2
+       "stderr": "[ingest] 81 new document(s) from /tmp/grader-hfd5iz1a/run/box/mailbox/batch_02\n[ingest] done\n",
+       "secs": 39.4
       },
       {
        "step": "report",
        "rc": 0,
        "stderr": "",
        "secs": 0.5
+      }
+     ],
+     "items": 17
+    }
+   ]
+  },
+  "autonomous": {
+   "W1": [
+    {
+     "batch": "batch_01",
+     "as_of": "2035-05-31",
+     "error": null,
+     "steps": [
+      {
+       "step": "ingest",
+       "rc": 0,
+       "stderr": "[ingest] 82 new document(s) from /tmp/grader-h86se5p4/run/box/mailbox/batch_01\n[ingest] done\n",
+       "secs": 2.0
+      },
+      {
+       "step": "report",
+       "rc": 0,
+       "stderr": "",
+       "secs": 0.3
+      },
+      {
+       "step": "feedback",
+       "rc": 0,
+       "stderr": "",
+       "secs": 0.1
+      }
+     ],
+     "items": 7
+    },
+    {
+     "batch": "batch_02",
+     "as_of": "2035-09-30",
+     "error": null,
+     "steps": [
+      {
+       "step": "ingest",
+       "rc": 0,
+       "stderr": "[ingest] 81 new document(s) from /tmp/grader-h86se5p4/run/box/mailbox/batch_02\n[ingest] done\n",
+       "secs": 6.2
+      },
+      {
+       "step": "report",
+       "rc": 0,
+       "stderr": "",
+       "secs": 0.4
       }
      ],
      "items": 17

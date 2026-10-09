@@ -1,0 +1,10 @@
+name: an invoice owed the step-down is not also an overcharge
+mailbox: evals/mailboxes/kestrel
+as_of: '2041-07-31'
+mode: supervised
+expect:
+  key:
+    invoice_id: KF-2041-103
+    class: overcharge
+  verdict: no_finding
+why: a margin that should have stepped down is a cashback item, never split into per-invoice overcharges

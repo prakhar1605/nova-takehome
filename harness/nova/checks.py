@@ -578,6 +578,36 @@ class Checks:
                                 self.add(it)
                     y, n_ = int(q[:4]), int(q[-1])
                     q = f"{y + (n_ == 4)}-Q{n_ % 4 + 1}"
+            # any other credit the contract promises for a contract year
+            for pc in cf.get("promised_credits") or []:
+                n_ = int(pc.get("contract_year") or 1)
+                start, end = add_years(eff, n_ - 1), add_years(eff, n_) - days(1)
+                if end >= w.as_of:
+                    continue
+                if D(pc.get("amount_usd")) is not None:
+                    earned = D(pc["amount_usd"])
+                elif D(pc.get("pct_of_qs")) is not None:
+                    spend, cnt = self.qualifying(cid, cf, start, end)
+                    if spend is None or not cnt:
+                        continue
+                    earned = pct_of(D(pc["pct_of_qs"]), spend)
+                else:
+                    continue
+                period = f"CY{n_}"
+                if ("cashback", cid, period, "promised_credit") in self.items:
+                    continue
+                got, cev = self.credits_issued(cid, period, "promised_credit")
+                owed = earned - got
+                if owed <= 0:
+                    continue
+                due = parse_date(pc.get("due_date")) or (add_years(eff, n_) + days(int(pc.get("due_days_after_year_end")
+                                                                                      or 60)))
+                remedy = "claim_credit" if w.as_of > due else "track_credit"
+                ev = _evs(w.ev(cdoc, pc.get("src")), cev)
+                it = self._mk(("cashback", cid, period, "promised_credit"), remedy, ev, (cdoc, cf), amount=r2(owed),
+                              conf=0.8)
+                it.update(contract_id=cid, period=period, credit_type="promised_credit")
+                self.add(it)
             im = cf.get("improvement")
             if im and D(im.get("pct")):
                 n = 1
