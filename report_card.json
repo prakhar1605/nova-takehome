@@ -448,8 +448,8 @@
       {
        "step": "ingest",
        "rc": 0,
-       "stderr": "[ingest] 82 new document(s) from /tmp/grader-3dx_qiqg/run/box/mailbox/batch_01\n[ingest] done\n",
-       "secs": 1.2
+       "stderr": "[ingest] 82 new document(s) from /tmp/grader-dvfias62/run/box/mailbox/batch_01\n[ingest] done\n",
+       "secs": 2.3
       },
       {
        "step": "report",
@@ -461,7 +461,7 @@
        "step": "feedback",
        "rc": 0,
        "stderr": "",
-       "secs": 0.1
+       "secs": 0.0
       }
      ],
      "items": 7
@@ -474,14 +474,14 @@
       {
        "step": "ingest",
        "rc": 0,
-       "stderr": "[ingest] 81 new document(s) from /tmp/grader-3dx_qiqg/run/box/mailbox/batch_02\n[ingest] done\n",
-       "secs": 5.4
+       "stderr": "[ingest] 81 new document(s) from /tmp/grader-dvfias62/run/box/mailbox/batch_02\n[ingest] done\n",
+       "secs": 6.7
       },
       {
        "step": "report",
        "rc": 0,
        "stderr": "",
-       "secs": 0.5
+       "secs": 0.4
       }
      ],
      "items": 17
@@ -498,8 +498,8 @@
       {
        "step": "ingest",
        "rc": 0,
-       "stderr": "[ingest] 82 new document(s) from /tmp/grader-gz2tqtnd/run/box/mailbox/batch_01\n[ingest] done\n",
-       "secs": 1.0
+       "stderr": "[ingest] 82 new document(s) from /tmp/grader-c146ryn3/run/box/mailbox/batch_01\n[ingest] done\n",
+       "secs": 2.3
       },
       {
        "step": "report",
@@ -524,14 +524,14 @@
       {
        "step": "ingest",
        "rc": 0,
-       "stderr": "[ingest] 81 new document(s) from /tmp/grader-gz2tqtnd/run/box/mailbox/batch_02\n[ingest] done\n",
-       "secs": 5.7
+       "stderr": "[ingest] 81 new document(s) from /tmp/grader-c146ryn3/run/box/mailbox/batch_02\n[ingest] done\n",
+       "secs": 6.2
       },
       {
        "step": "report",
        "rc": 0,
        "stderr": "",
-       "secs": 0.4
+       "secs": 0.5
       }
      ],
      "items": 17

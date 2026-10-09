@@ -45,6 +45,7 @@ Rules:
 - Quoted or forwarded text (lines starting with ">" or below "On ... wrote:" / "Forwarded message") is not the
   sender's own words: set quoted=true on anything you record from it, and name its original sender.
 - Call every tool that applies (an email may hold several facts). If nothing applies, call record_nothing.
+- Answer only with tool calls: no prose.
 """
 
 SRC = {"type": "array", "items": {"type": "integer"}, "minItems": 1, "maxItems": 2,
@@ -324,15 +325,17 @@ class LLMReader:
         key = hashlib.sha256(json.dumps([MODEL, SYSTEM, TOOLS, content], sort_keys=True,
                                         default=str).encode()).hexdigest()
         for p in [self.store.cache_path(key)] + ([self.shared / f"{key}.json"] if self.shared else []):
-            if p.exists():
+            if p.exists() and not os.environ.get("NOVA_NO_CACHE"):
                 return json.loads(p.read_text())
         t0 = time.time()
-        resp = self.client.messages.create(
-            model=MODEL, max_tokens=max_tokens,
-            system=[{"type": "text", "text": SYSTEM, "cache_control": {"type": "ephemeral"}}],
-            tools=TOOLS[:-1] + [{**TOOLS[-1], "cache_control": {"type": "ephemeral"}}],
-            tool_choice={"type": "any"},
-            messages=[{"role": "user", "content": content}])
+        # streamed, so long contract readings never hit the non-streaming time limit
+        with self.client.messages.stream(
+                model=MODEL, max_tokens=max_tokens,
+                system=[{"type": "text", "text": SYSTEM, "cache_control": {"type": "ephemeral"}}],
+                tools=TOOLS[:-1] + [{**TOOLS[-1], "cache_control": {"type": "ephemeral"}}],
+                tool_choice={"type": "auto"},
+                messages=[{"role": "user", "content": content}]) as stream:
+            resp = stream.get_final_message()
         calls = [{"name": b.name, "input": b.input} for b in resp.content if getattr(b, "type", "") == "tool_use"]
         usage = getattr(resp, "usage", None)
         rec = {"model": MODEL, "secs": round(time.time() - t0, 1), "stop": resp.stop_reason,
@@ -387,6 +390,13 @@ class LLMReader:
             f = dict(c["input"])
             f["type"] = t
             f = self._fix(f, num, doc, labels)
+            if f and t in ("amendment", "rate_notice", "annex") and not (f.get("rates") or f.get("annex_refs")
+                                                                         or f.get("term") or f.get("fx")):
+                continue                                 # a cover email about an instrument, not the instrument
+            if f and t == "contract" and not f.get("rates") and doc["ext"] == "eml":
+                continue
+            if f and t == "awb" and not (f.get("date") or f.get("chargeable_weight") or f.get("total_chargeable_weight")):
+                continue                                 # an AWB number mentioned elsewhere is not an AWB
             if f:
                 facts.append(f)
         return self._merge_with_rules(doc, facts, labels)
@@ -395,7 +405,16 @@ class LLMReader:
     def _fix(self, f: dict, num: Numbered, doc: dict, labels) -> dict | None:
         t = f["type"]
         verified = True
+        if t == "invoice_cover" and doc["ext"] != "eml":
+            return None                                  # a cover is the email's own words
         f["src"] = num.src(f.get("src")) or [1, 1]
+        # a whole-document span is not a citation: keep the line that holds the document's id
+        ident = f.get("invoice_id") or f.get("contract_id") or f.get("credit_note_id") or f.get("awb") or f.get("name")
+        if len(f["src"]) > 2 and f["src"][2] - f["src"][1] > 2 and t not in ("waiver", "rate_notice", "injection"):
+            p, a, b = f["src"]
+            lines = doc["pages"][p - 1].split("\n")
+            hit = next((i for i in range(a, b + 1) if ident and str(ident) in lines[i - 1]), a)
+            f["src"] = [p, hit]
         for k in ("amount_src", "date_src", "chargeable_src"):
             if k in f:
                 f[k] = num.src(f.get(k))

@@ -65,8 +65,38 @@ class Checks:
         month = ym(inv.get("invoice_date"))
         rate, ev = self.w.fx(cf, month)
         if rate is None:
-            return None, None, {"name": f"Annex F exchange rate for {month}", "holder": self.w.holder(cf, "treasury")}
+            return None, None, {"name": f"{self.fx_doc_name(cf)} (INR per USD rate for {month})",
+                                "holder": self.w.holder(cf, "treasury")}
         return r2(amount / rate), ev, None
+
+    def fx_doc_name(self, cf) -> str:
+        """The document the contract says will carry later exchange rates, as it cites it ('Annex F update')."""
+        c = self.w.contract(cf.get("contract_id"))
+        if c:
+            for p in c[0].pages:
+                m = re.search(r"issued by [A-Za-z ]+? as an? (Annex [A-Z][A-Za-z0-9 ]*?)[.;]", " ".join(p.split()))
+                if m:
+                    return m[1].strip()
+        return "Annex F update"
+
+    @staticmethod
+    def _quoted_header(doc):
+        """Date and subject of the original message inside a forward or a reply, as the forward cites them."""
+        qd = qs = None
+        for s_ in doc.lines(1):
+            t = s_.lstrip("> ").strip()
+            m = re.match(r"^On (\d{4}-\d{2}-\d{2}|.{4,40}?),? .{0,60}wrote:", t)
+            if m and not qd:
+                d = parse_date(m[1])
+                qd = d.isoformat() if d else None
+            m = re.match(r"^(?:Date|Sent):\s*(.+)$", t)
+            if m and not qd and doc.lines(1).index(s_) > 5:
+                d = parse_date(m[1])
+                qd = d.isoformat() if d else None
+            m = re.match(r"^Subject:\s*(.+)$", t)
+            if m and doc.lines(1).index(s_) > 5:
+                qs = m[1].strip()
+        return qd, qs
 
     def add(self, item):
         k = item["key"]
@@ -225,9 +255,10 @@ class Checks:
                     p = w.person(cf, name=sender)
                     holder = ({"party": p["party"], "person": p["name"], "role": p.get("title")}
                               if p and "waivers" in (p.get("categories") or []) else w.kam(cf))
-                    missing = {"name": f"original email from {sender} waiving the "
-                                       f"{wv.get('charge_label') or wv.get('charge_code')} "
-                                       f"({wdoc.meta.get('subject', '')})", "holder": holder}
+                    qd, qs = self._quoted_header(wdoc)
+                    missing = {"name": f"original email from {sender}" + (f" dated {qd}" if qd else "") +
+                                       f" (subject: {qs or wdoc.meta.get('subject', '')}) waiving the "
+                                       f"{wv.get('charge_label') or wv.get('charge_code')}", "holder": holder}
                     verdict = verdict or "cannot_determine"
                     evs += [w.ev(wdoc, wv.get("src")), w.ev(doc, ln.get("src"))]
                     continue
@@ -329,6 +360,8 @@ class Checks:
                                       missing=miss, conf=0.8))
                     continue
                 conf = 0.95
+                if not all(w.agrees(doc, r["line"]) for r in over):
+                    conf -= 0.15                       # the two readers read a deciding line differently
                 if gate["pickup_record"]:
                     conf -= 0.08
                 if doc.scan:

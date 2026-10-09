@@ -13,6 +13,7 @@ fault, peak season months).
 """
 from __future__ import annotations
 
+import re
 from decimal import Decimal
 
 from .util import D, ZERO, norm_label, parse_date, r2, ym
@@ -198,7 +199,7 @@ def dg_profile(world, awb):
         doc, f = world.dgds[awb]
         known = True
         for it in f.get("items") or []:
-            u = str(it.get("un") or "").replace("UN", "")
+            u = re.sub(r"\D", "", str(it.get("un") or ""))
             if u == "1845" or "dry ice" in str(it.get("description", "")).lower():
                 dry = True
             elif u:
@@ -207,6 +208,7 @@ def dg_profile(world, awb):
     if awb in world.awbs:
         doc, f = world.awbs[awb]
         for u in f.get("un_numbers") or []:
+            u = re.sub(r"\D", "", str(u))
             known = True
             if u == "1845":
                 dry = True

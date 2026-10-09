@@ -23,7 +23,7 @@
     {
      "doc": "batch_01/0017.eml",
      "page": 1,
-     "quote": "Our records show invoice CDU-3051273 as outstanding."
+     "quote": "Our records show invoice CDU-3051273 as outstanding. Please process payment at your earliest convenience."
     },
     {
      "doc": "batch_01/0017.eml#CDU-3051273.pdf",
@@ -60,8 +60,8 @@
     },
     {
      "doc": "batch_01/0003.eml#MSA-CDA-US-EXP-E91.pdf",
-     "page": 4,
-     "quote": "10.5 Extension of due date. A due date may be extended by written notice from the Carrier's Authorised Person (payment terms); the extended date replaces the due date for clause 10.2."
+     "page": 3,
+     "quote": "2.4 Extension. The term may be extended only by an instrument signed by both parties."
     },
     {
      "doc": "batch_02/0023.eml#ap-register-2031-02-28.xlsx",
@@ -76,7 +76,7 @@
     {
      "doc": "batch_01/0003.eml#MSA-CDA-US-EXP-E91.pdf",
      "page": 4,
-     "quote": "10.2 Late fee. Undisputed amounts outstanding for more than 0 days past the due date incur a late fee of 1.49% per month or part thereof. days_late = paid date - due date; no fee is due if days_late <= 0; otherwise n = ceil(days_late / 30) fee months, each fee_i = 1.49% x base_i rounded to cents, base_i per clause 10.3."
+     "quote": "10.2 Late fee. Undisputed amounts outstanding for more than 0 days past the due date incur a late fee of 1.49% per month or part thereof. days_late = paid date - due date; no fee is due if days_late <= 0; otherwise n = ceil(days_late / 30) fee months, each fee_i = 1.49% x base_i rounded to cents, base_i per clause 10.3. 10.3 Compounding. Late fees unpaid at the end of a month are added to the overdue balance, and the next month's fee is charged on principal plus unpaid prior late fees. Fees shown paid leave the base."
     }
    ],
    "missing_doc": null,
@@ -280,7 +280,7 @@
     {
      "doc": "batch_01/0003.eml#MSA-CDA-US-EXP-E91.pdf",
      "page": 3,
-     "quote": "5.2 Dry ice. Dry ice (UN1845) used solely as a refrigerant for non-dangerous goods is billed at the Dry Ice Handling Fee in"
+     "quote": "5.2 Dry ice. Dry ice (UN1845) used solely as a refrigerant for non-dangerous goods is billed at the Dry Ice Handling Fee in Annex D, once per shipment (not per package or per kg), and does not attract the Dangerous Goods Fee."
     }
    ],
    "missing_doc": null,
@@ -369,7 +369,7 @@
     {
      "doc": "batch_01/0007.eml",
      "page": 1,
-     "quote": "Please treat the Delivery fee on AWB CA10343321 as waived."
+     "quote": "Please treat the Delivery fee on AWB CA10343321 as waived. We will not pursue payment of that line."
     },
     {
      "doc": "batch_01/0003.eml#MSA-CDA-US-EXP-E91.pdf",
@@ -412,7 +412,7 @@
     {
      "doc": "batch_02/0009.eml",
      "page": 1,
-     "quote": "The Delivery fee billed against AWB CA75329761 is waived, with our apologies."
+     "quote": "The Delivery fee billed against AWB CA75329761 is waived, with our apologies. Kindly deduct it when you pay."
     },
     {
      "doc": "batch_01/0003.eml#MSA-CDA-US-EXP-E91.pdf",
@@ -459,7 +459,7 @@
      {
       "doc": "batch_01/0003.eml#MSA-CDA-US-EXP-E91.pdf",
       "page": 4,
-      "quote": "7.1 Volume rebate. The Carrier shall credit a rebate on each Quarter's Qualifying Spend (QS) at the tier reached: QS >= USD 77,000.00: 5%; QS >= USD 132,000.00: 7.5%; QS >= USD 208,000.00: 10%. The tier rate applies to all QS in the Quarter."
+      "quote": "7.1 Volume rebate. The Carrier shall credit a rebate on each Quarter's Qualifying Spend (QS) at the tier reached: QS >= USD 77,000.00: 5%; QS >= USD 132,000.00: 7.5%; QS >= USD 208,000.00: 10%. The tier rate applies to all QS in the Quarter. 7.2 Thresholds. Rebate thresholds are in USD per Quarter. 7.3 Rebate credit. The Carrier issues rebate credit notes no later than 45 days after the end of each Quarter."
      },
      {
       "doc": "batch_01/0003.eml#MSA-CDA-US-EXP-E91.pdf",
@@ -523,7 +523,7 @@
      {
       "doc": "batch_01/0003.eml#MSA-CDA-US-EXP-E91.pdf",
       "page": 4,
-      "quote": "10.2 Late fee. Undisputed amounts outstanding for more than 0 days past the due date incur a late fee of 1.49% per month or part thereof. days_late = paid date - due date; no fee is due if days_late <= 0; otherwise n = ceil(days_late / 30) fee months, each fee_i = 1.49% x base_i rounded to cents, base_i per clause 10.3."
+      "quote": "10.2 Late fee. Undisputed amounts outstanding for more than 0 days past the due date incur a late fee of 1.49% per month or part thereof. days_late = paid date - due date; no fee is due if days_late <= 0; otherwise n = ceil(days_late / 30) fee months, each fee_i = 1.49% x base_i rounded to cents, base_i per clause 10.3. 10.3 Compounding. Late fees unpaid at the end of a month are added to the overdue balance, and the next month's fee is charged on principal plus unpaid prior late fees. Fees shown paid leave the base."
      }
     ],
     "missing_doc": null,

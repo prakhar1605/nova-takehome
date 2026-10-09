@@ -37,6 +37,7 @@ class World:
         self.store = store
         self.docs: dict[str, Doc] = {}
         self.facts: list[tuple[Doc, dict]] = []
+        self.second: dict[tuple, dict] = {}      # (doc id, page, line) -> the other reader's reading of an invoice line
         for d in store.docs():
             if parse_date(d["received"]) > self.as_of:
                 continue
@@ -45,6 +46,11 @@ class World:
             self.docs[doc.id] = doc
             for f in fx.get("facts") or []:
                 self.facts.append((doc, f))
+            for f in fx.get("rules_facts") or []:
+                if f.get("type") == "invoice":
+                    for ln in f.get("lines") or []:
+                        if ln.get("src"):
+                            self.second[(doc.id, *ln["src"][:2])] = ln
         self._index()
 
     # ---- indexing ---------------------------------------------------------------------------------------------------
@@ -88,16 +94,28 @@ class World:
             elif t == "ledger":
                 self.ledgers.append((doc, f))
             elif t == "awb" and f.get("awb"):
-                self.awbs[f["awb"]] = (doc, f)
+                old = self.awbs.get(f["awb"])
+                if old is None or not (old[1].get("date") or old[1].get("chargeable_weight")):
+                    self.awbs[f["awb"]] = (doc, f)
             elif t == "dg_declaration" and f.get("awb"):
                 self.dgds[f["awb"]] = (doc, f)
-            elif t == "invoice_cover":
-                self.covers[doc.email] = (doc, f)
+            elif t == "invoice_cover" and doc.id == doc.email:
+                self.covers[doc.email] = (doc, f)          # only the email's own words, never an attachment's
             elif t == "injection":
                 self.injections.append((doc, f))
         self.ledgers.sort(key=lambda x: (str(x[1].get("as_of") or x[0].received), x[0].received_at))
         for k in self.invoices:
             self.invoices[k].sort(key=lambda x: x[0].received_at)
+
+    def agrees(self, doc: Doc, ln: dict) -> bool:
+        """Did both readers read this invoice line the same way? (True when only one reader ran)"""
+        if doc.reader != "llm" or ln.get("from_rules"):
+            return doc.reader != "llm" or (doc.id, *(ln.get("src") or [0, 0])[:2]) in self.second
+        o = self.second.get((doc.id, *(ln.get("src") or [0, 0])[:2]))
+        if o is None:
+            return False
+        same = lambda a, b: (D(a) is None and D(b) is None) or (D(a) is not None and D(b) is not None and D(a) == D(b))  # noqa: E731
+        return same(o.get("amount"), ln.get("amount")) and (o.get("qty") is None or same(o.get("qty"), ln.get("qty")))
 
     # ---- evidence ---------------------------------------------------------------------------------------------------
     def ev(self, doc: Doc, src) -> dict | None:
