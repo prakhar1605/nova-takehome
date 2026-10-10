@@ -40,12 +40,14 @@ the exam answers with it, and the walkthrough I prepared for the call.
 
 ## Prompt log
 
-The full session export is in `ai_log/` (trimmed only for the API key). My prompts, in order:
+The full session is in `ai_log/session.md`, converted from the agent's session file; only the API key and the app's
+injected context blocks are removed. My prompts, in order:
 
 1. "mujhe ek project mil hai tumko us project ko achhe se samjhana or complete karwana hai assignment hai" + the
    assignment email from GoComet and https://github.com/gocomet-india/nova-takehome (and the README pasted as a file).
 2. The API key (removed here) + "repo ka name tum btao".
-3. Follow-ups about the repo and submission.
+3. "bna di private repo" (the empty repo for the push), then "main kya karu ab btao mujhe kya karna hai simple
+   langauge main".
 
 What the agent did between prompts, in short:
 1. Cloned the repo; read README, GLOSSARY, every worked example, the grader (`score.py`, `grade_sheet.py`,
@@ -59,4 +61,5 @@ What the agent did between prompts, in short:
 4. With the key: fixed the `tool_choice` and streaming errors, ran practice (92.1 → found and fixed the two
    misreadings → 99.9), the exam sheet (same as the rules reader) and the evals (27/27), compared the readers
    field by field, and measured cost with the cache off ($0.93 for 86 documents).
-5. Wrote DESIGN.md, SOLUTION.md and this file, ran `make validate`, and pushed to the private repo.
+5. Wrote DESIGN.md, SOLUTION.md and this file, ran `make validate`, pushed to the private repo, re-ran the CI setup
+   (Python 3.11, no API key) to check it stays green, and added this log.
